@@ -16,6 +16,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define _GNU_SOURCE
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -42,6 +43,29 @@ struct utst_s {
   }\
 } while (0)
 
+#define UTST_RASSERT(utst,cond_expr) do {\
+  ++ utst->num_asserts; \
+  utst->error_array = (char **)realloc(utst->error_array,\
+                                       utst->num_asserts * sizeof(char *));\
+  if (cond_expr) {\
+    utst->error_array[utst->num_asserts - 1] = NULL;\
+  } else {\
+    asprintf(&(utst->error_array[utst->num_asserts - 1]),\
+             "UTST_RASSERT failed at %s:%d (%s)",\
+             __FILE__, __LINE__, #cond_expr);\
+    return;\
+  }\
+} while (0)
+
+#define UTST_AASSERT(cond_expr) do {\
+  if (!(cond_expr)) {\
+    fprintf(stderr, "UTST_AASSERT failed at %s:%d (%s)",\
+             __FILE__, __LINE__, #cond_expr);\
+    fflush(stderr);\
+    abort();\
+  }\
+} while (0)
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */
@@ -58,9 +82,12 @@ for F in $*; do :
 void utst_new(utst_t **utst_p, char *function_name)
 {
   utst_t *utst = (utst_t *)malloc(sizeof(utst_t));
+  UTST_AASSERT(utst != NULL);
   utst->function_name = strdup(function_name);
+  UTST_AASSERT(utst->function_name != NULL);
   utst->num_asserts = 0;
   utst->error_array = (char **)malloc(sizeof(char *));
+  UTST_AASSERT(utst->error_array != NULL);
   utst->error_array[0] = NULL;
 
   *utst_p = utst;

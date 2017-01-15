@@ -44,9 +44,12 @@ UTST_FUNCTION(utst_utst_1)
   ERR_ASSERT(utst->error_array[1] != NULL);
   ERR_ASSERT(utst->error_array[2] == NULL);
   ERR_ASSERT(utst->error_array[3] != NULL);
+
+  free(s1);
 }  /* utst_utst_1 */
 
 
+/* Test empty function */
 UTST_FUNCTION(utst_utst_2)
 {
 }  /* utst_utst_2 */
